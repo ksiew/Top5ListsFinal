@@ -55,6 +55,22 @@ function AuthContextProvider(props) {
         }
     }
 
+    auth.logInUser = async function(userData, store) {
+        const response = await api.loginUser(userData);      
+        if (response.status === 200) {
+            authReducer({
+                type: AuthActionType.REGISTER_USER,
+                payload: {
+                    user: response.data.user
+                }
+            })
+            history.push("/");
+            store.loadIdNamePairs();
+        }else{
+            
+        }
+    }
+
     auth.registerUser = async function(userData, store) {
         const response = await api.registerUser(userData);      
         if (response.status === 200) {
