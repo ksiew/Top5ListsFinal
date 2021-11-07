@@ -24,13 +24,12 @@ export default function SignInSide() {
   const { store } = useContext(GlobalStoreContext);
 
   const handleSubmit = (event) => {
-    console.log("loggged");
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     // eslint-disable-next-line no-console
     auth.logInUser({ 
       email: data.get('email'),
-      password: data.get('password')
+      password: data.get('password'),
     }, store);
   };
 
