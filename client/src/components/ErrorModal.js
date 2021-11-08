@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { styled, Box } from '@mui/system';
 import ModalUnstyled from '@mui/core/ModalUnstyled';
+import AuthContext from '../auth';
 
 const StyledModal = styled(ModalUnstyled)`
   position: fixed;
@@ -34,13 +35,18 @@ const style = {
   pb: 3,
 };
 
-export default function ModalUnstyledDemo() {
+export default function ErrorModal(props) {
   const [open, setOpen] = React.useState(false);
+  const {error, logout} = props;
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  let text = "";
-  const updateText = (newText) => {
-      text = newText;
+
+  if(error != "" && !open){
+      handleOpen();
+  }
+
+  const handleClose = () => {
+    setOpen(false)
+    logout();
   };
 
   return (
@@ -50,12 +56,19 @@ export default function ModalUnstyledDemo() {
         aria-describedby="unstyled-modal-description"
         open={open}
         onClose={handleClose}
+        onClick ={handleClose}
         BackdropComponent={Backdrop}
       >
         <Box sx={style}>
-          <h2 id="unstyled-modal-title">{text}</h2>
+        <button
+          onClick={handleClose}
+          >
+          &#x24E7;
+          </button>
+          <h2 id="unstyled-modal-title">{error}</h2>
         </Box>
       </StyledModal>
     </div>
   );
 }
+
