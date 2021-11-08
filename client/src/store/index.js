@@ -231,8 +231,14 @@ function GlobalStoreContextProvider(props) {
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
     store.loadIdNamePairs = async function () {
         const response = await api.getTop5ListPairs();
+
         if (response.data.success) {
-            let pairsArray = response.data.idNamePairs;
+            let fuck = await api.getAllTop5Lists();
+            console.log(fuck.data.data);
+            let fuck2 = [];
+            fuck.data.data.forEach(list => fuck2[list._id] = list);
+            console.log(fuck2);
+            let pairsArray = response.data.idNamePairs.filter(pair => fuck2[pair._id].ownerEmail == auth.user.email);
             storeReducer({
                 type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
                 payload: pairsArray

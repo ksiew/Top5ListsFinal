@@ -17,8 +17,8 @@ getLoggedIn = async (req, res) => {
 }
 
 logIn = async (req, res) => {
-   // try {
-        const {  email, password, id } = req.body;
+    try {
+        const {  email, password } = req.body;
         if (!email || !password ) {
             return res
                 .status(400)
@@ -32,13 +32,25 @@ logIn = async (req, res) => {
                 });
         }
 
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const passwordHash = await bcrypt.hash(password, salt);
-
-
-
         const user = await User.findOne({email: email});
+
+        if(user === null){
+            return res
+            .status(400)
+            .json({
+                errorMessage: "User does not exist"
+            });
+        }
+
+        const passwordCorrect = await bcrypt.compare(password,user.passwordHash);
+
+        if(!passwordCorrect){
+            return res
+            .status(400)
+            .json({
+                errorMessage: "Wrong password"
+            });
+        }
 
         // LOGIN THE USER
         const token = auth.signToken(user);
@@ -55,13 +67,12 @@ logIn = async (req, res) => {
                 email: user.email
             }
         }).send();
-        /*
+        
     } catch (err) {
         console.error(err);
         res.status(500).send();
         
     }
-    */
 }
 
 registerUser = async (req, res) => {

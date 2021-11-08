@@ -75,7 +75,6 @@ export default function AppBanner() {
     let editToolbar = "";
     let menu = loggedOutMenu;
     if (auth.loggedIn) {
-        console.log(auth.user.firstName);
         intials = auth.user.firstName.charAt(0) + auth.user.lastName.charAt(1);
         menu = loggedInMenu;
         if (store.currentList) {

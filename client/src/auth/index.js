@@ -73,9 +73,7 @@ function AuthContextProvider(props) {
 
     auth.logInUser = async function(userData, store) {
         const response = await api.loginUser(userData);    
-        console.log(response.data.user);  
         if (response.status === 200) {
-            console.log("non error");
             authReducer({
                 type: AuthActionType.REGISTER_USER,
                 payload: {
@@ -84,9 +82,9 @@ function AuthContextProvider(props) {
             })
             history.push("/");
             store.loadIdNamePairs();
-        }else{
-            console.log(" error");
-            history.push("/");
+        }
+        if(response.status === 400){
+
         }
     }
 
