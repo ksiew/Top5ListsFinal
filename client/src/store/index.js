@@ -234,10 +234,8 @@ function GlobalStoreContextProvider(props) {
 
         if (response.data.success) {
             let fuck = await api.getAllTop5Lists();
-            console.log(fuck.data.data);
             let fuck2 = [];
             fuck.data.data.forEach(list => fuck2[list._id] = list);
-            console.log(fuck2);
             let pairsArray = response.data.idNamePairs.filter(pair => fuck2[pair._id].ownerEmail == auth.user.email);
             storeReducer({
                 type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
@@ -338,7 +336,6 @@ function GlobalStoreContextProvider(props) {
     }
 
     store.updateItem = function (index, newItem) {
-        console.log(store.currentList.items);
 
         store.currentList.items[index] = newItem;
         store.updateCurrentList();

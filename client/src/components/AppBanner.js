@@ -75,7 +75,7 @@ export default function AppBanner() {
     let editToolbar = "";
     let menu = loggedOutMenu;
     if (auth.loggedIn) {
-        intials = auth.user.firstName.charAt(0) + auth.user.lastName.charAt(1);
+        intials = auth.user.firstName.charAt(0) + auth.user.lastName.charAt(0);
         menu = loggedInMenu;
         if (store.currentList) {
             editToolbar = <EditToolbar />;
@@ -100,7 +100,12 @@ export default function AppBanner() {
                     </Typography>
                     <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
                     <Box sx={{ display: { xs: 'none', md: 'flex' } }}> 
-                        {intials}
+                    <Box 
+                    sx={{ flexGrow: 1 }}
+                    style={{
+                        fontSize: '24pt',
+                        width: '80%'
+                    }}>{intials}</Box>
                         <IconButton
                             size="large"
                             edge="end"

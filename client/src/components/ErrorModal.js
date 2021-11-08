@@ -28,7 +28,7 @@ const Backdrop = styled('div')`
 
 const style = {
   width: 400,
-  bgcolor: 'background.paper',
+  bgcolor: 'white',
   border: '2px solid #000',
   p: 2,
   px: 4,
@@ -36,25 +36,23 @@ const style = {
 };
 
 export default function ErrorModal(props) {
-  const [open, setOpen] = React.useState(false);
-  const {error, logout} = props;
+    const { auth } = React.useContext(AuthContext);
+  const [open, setOpen] = React.useState(props.open);
+  const {error} = props;
   const handleOpen = () => setOpen(true);
-
-  if(error != "" && !open){
-      handleOpen();
-  }
-
   const handleClose = () => {
-    setOpen(false)
-    logout();
+    auth.getLoggedIn();
+    console.log("closing");
   };
 
+
+  console.log(open);
   return (
     <div>
       <StyledModal
         aria-labelledby="unstyled-modal-title"
         aria-describedby="unstyled-modal-description"
-        open={open}
+        open={props.open}
         onClose={handleClose}
         onClick ={handleClose}
         BackdropComponent={Backdrop}
