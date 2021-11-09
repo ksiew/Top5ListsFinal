@@ -264,6 +264,7 @@ function GlobalStoreContextProvider(props) {
     // FUNCTIONS ARE markListForDeletion, deleteList, deleteMarkedList,
     // showDeleteListModal, and hideDeleteListModal
     store.markListForDeletion = async function (id) {
+          
         // GET THE LIST
         let response = await api.getTop5ListById(id);
         if (response.data.success) {

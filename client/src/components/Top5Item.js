@@ -18,7 +18,6 @@ function Top5Item(props) {
     const [draggedTo, setDraggedTo] = useState(0);
 
     function handleToggleEdit(event) {
-        console.log("item edit click");
         event.stopPropagation();
         toggleEdit();
     }
@@ -35,7 +34,6 @@ function Top5Item(props) {
     function handleKeyPress(event) {
         if (event.code === "Enter") {
             let id = event.target.id.substring(event.target.id.indexOf("-") + 1);
-            console.log(event.target.id);
             store.addUpdateItemTransaction(id, event.target.value);
             toggleEdit();
         }

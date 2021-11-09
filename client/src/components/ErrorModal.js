@@ -42,11 +42,9 @@ export default function ErrorModal(props) {
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     auth.getLoggedIn();
-    console.log("closing");
   };
 
 
-  console.log(open);
   return (
     <div>
       <StyledModal
