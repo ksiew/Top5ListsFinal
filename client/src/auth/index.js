@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import { useHistory } from 'react-router-dom'
 import ErrorModal from '../components/ErrorModal'
+import DeleteModal from '../components/DeleteModal'
 import api from '../api'
 
 const AuthContext = createContext();
@@ -61,6 +62,7 @@ function AuthContextProvider(props) {
                     loadModal : true
                 });
             }
+
             default:
                 return auth;
         }
@@ -70,7 +72,7 @@ function AuthContextProvider(props) {
         const response = await api.getLoggedIn();
         if (response.status === 200) {
             authReducer({
-                type: AuthActionType.SET_LOGGED_IN,
+                type: AuthActionType.GET_LOGGED_IN,
                 payload: {
                     loggedIn: response.data.loggedIn,
                     user: response.data.user
@@ -83,9 +85,9 @@ function AuthContextProvider(props) {
         authReducer({
             type: AuthActionType.LOG_OUT,
             payload: {
-
             }
         });
+        history.push("/");
     }
 
     auth.logInUser = async function(userData, store) {  
@@ -136,29 +138,18 @@ function AuthContextProvider(props) {
         }
     }
     
-
-    if(auth.loadModal){
-        console.log(auth.loadModal);
-        return (
-            <AuthContext.Provider value={{
-                auth
-            }}>
-                {props.children}
-                <ErrorModal 
-                error = {auth.message}
-                open={auth.loadModal}
-                />
-            </AuthContext.Provider>
-        );
-    }else{
-        return (
-            <AuthContext.Provider value={{
-                auth
-            }}>
-                {props.children}
-            </AuthContext.Provider>
-        );
-    }
+    console.log(auth.loadModal);
+    return (
+        <AuthContext.Provider value={{
+            auth
+        }}>
+            {props.children}
+            <ErrorModal 
+            error = {auth.message}
+            open={auth.loadModal}
+            />
+        </AuthContext.Provider>
+    );
 }
 
 export default AuthContext;
