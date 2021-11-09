@@ -60,7 +60,7 @@ function GlobalStoreContextProvider(props) {
             case GlobalStoreActionType.CHANGE_LIST_NAME: {
                 return setStore({
                     idNamePairs: payload.idNamePairs,
-                    currentList: payload.top5List,
+                    currentList: null,
                     newListCounter: store.newListCounter,
                     isListNameEditActive: false,
                     isItemEditActive: false,
@@ -186,7 +186,10 @@ function GlobalStoreContextProvider(props) {
                     async function getListPairs(top5List) {
                         response = await api.getTop5ListPairs();
                         if (response.data.success) {
-                            let pairsArray = response.data.idNamePairs;
+                            let fuck = await api.getAllTop5Lists();
+                            let fuck2 = [];
+                            fuck.data.data.forEach(list => fuck2[list._id] = list);
+                            let pairsArray = response.data.idNamePairs.filter(pair => fuck2[pair._id].ownerEmail == auth.user.email);
                             storeReducer({
                                 type: GlobalStoreActionType.CHANGE_LIST_NAME,
                                 payload: {

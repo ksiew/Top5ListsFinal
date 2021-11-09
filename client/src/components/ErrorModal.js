@@ -41,7 +41,7 @@ export default function ErrorModal(props) {
   const {error} = props;
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
-    auth.getLoggedIn();
+    auth.retry();
   };
 
 

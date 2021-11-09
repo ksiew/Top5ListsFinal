@@ -21,6 +21,7 @@ function AuthContextProvider(props) {
         message: "",
         loadModal : false
     });
+    
     const history = useHistory();
 
     useEffect(() => {
@@ -82,12 +83,23 @@ function AuthContextProvider(props) {
     }
 
     auth.logoutUser = async function() {
+        const response = await api.logoutUser();
+        if(response.status === 200){
+            authReducer({
+                type: AuthActionType.LOG_OUT,
+                payload: {
+                }
+            });
+            history.push("/");
+        }
+    }
+
+    auth.retry = async function() {
         authReducer({
             type: AuthActionType.LOG_OUT,
             payload: {
             }
         });
-        history.push("/");
     }
 
     auth.logInUser = async function(userData, store) {  
@@ -138,7 +150,6 @@ function AuthContextProvider(props) {
         }
     }
     
-    console.log(auth.loadModal);
     return (
         <AuthContext.Provider value={{
             auth
