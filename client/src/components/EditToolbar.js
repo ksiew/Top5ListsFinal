@@ -30,14 +30,14 @@ function EditToolbar() {
     return (
         <div id="edit-toolbar">
             <Button 
-                disabled={editStatus ? false : store.canUndo() ? false : true}
+                disabled={editStatus ? true : store.canUndo() ? false : true}
                 id='undo-button'
                 onClick={handleUndo}
                 variant="contained">
                     <UndoIcon />
             </Button>
             <Button 
-                disabled={editStatus ? false : store.canRedo() ? false : true}
+                disabled={editStatus ? true : store.canRedo() ? false : true}
                 id='redo-button'
                 onClick={handleRedo}
                 variant="contained">
