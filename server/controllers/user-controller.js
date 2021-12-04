@@ -10,7 +10,8 @@ getLoggedIn = async (req, res) => {
             user: {
                 firstName: loggedInUser.firstName,
                 lastName: loggedInUser.lastName,
-                email: loggedInUser.email
+                email: loggedInUser.email,
+                userName: savedUser.userName
             }
         }).send();
     })
@@ -77,7 +78,8 @@ logIn = async (req, res) => {
             user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
-                email: user.email
+                email: user.email,
+                userName: savedUser.userName
             }
         }).send();
         
@@ -90,8 +92,8 @@ logIn = async (req, res) => {
 
 registerUser = async (req, res) => {
     try {
-        const { firstName, lastName, email, password, passwordVerify } = req.body;
-        if (!firstName || !lastName || !email || !password || !passwordVerify) {
+        const { firstName, lastName, email, password, passwordVerify, userName } = req.body;
+        if (!firstName || !lastName || !email || !password || !passwordVerify || !userName) {
             return res
                 .status(400)
                 .json({ errorMessage: "Please enter all required fields." });
@@ -125,7 +127,7 @@ registerUser = async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
 
         const newUser = new User({
-            firstName, lastName, email, passwordHash
+            firstName, lastName, email, passwordHash, userName
         });
         const savedUser = await newUser.save();
 
@@ -141,7 +143,8 @@ registerUser = async (req, res) => {
             user: {
                 firstName: savedUser.firstName,
                 lastName: savedUser.lastName,
-                email: savedUser.email
+                email: savedUser.email,
+                userName: savedUser.userName
             }
         }).send();
     } catch (err) {
