@@ -69,7 +69,7 @@ function Top5Item(props) {
         sourceId = sourceId.substring(sourceId.indexOf("-") + 1);
         setDraggedTo(false);
 
-        console.log("handleDrop (sourceId, targetId): ( " + sourceId + ", " + targetId + ")");
+
 
         // UPDATE THE LIST
         store.addMoveItemTransaction(sourceId, targetId);
