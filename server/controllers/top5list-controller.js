@@ -53,6 +53,12 @@ updateTop5List = async (req, res) => {
 
         top5List.name = body.name
         top5List.items = body.items
+        top5List.views = body.views
+        top5List.likes = body.likes
+        top5List.dislikes = body.dislikes
+        top5List.comments  = body.comments
+        top5List.published = body.published
+        top5List.publishDate = body.publishDate
         top5List
             .save()
             .then(() => {
@@ -108,6 +114,22 @@ getTop5Lists = async (req, res) => {
         return res.status(200).json({ success: true, data: top5Lists })
     }).catch(err => console.log(err))
 }
+
+getTop5ListsPublished = async (req, res) => {
+    await Top5List.find({}, (err, top5Lists) => {
+        if (err) {
+            return res.status(400).json({ success: false, error: err })
+        }
+        if (!top5Lists.length) {
+            return res
+                .status(404)
+                .json({ success: false, error: `Top 5 Lists not found` })
+        }
+        let filtered = top5Lists.filter(list =>  list.published == true)
+        return res.status(200).json({ success: true, data: filtered })
+    }).catch(err => console.log(err))
+}
+
 getTop5ListPairs = async (req, res) => {
     await Top5List.find({ }, (err, top5Lists) => {
         if (err) {

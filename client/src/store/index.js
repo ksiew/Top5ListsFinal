@@ -27,7 +27,8 @@ export const GlobalStoreActionType = {
     UNMARK_LIST_FOR_DELETION: "UNMARK_LIST_FOR_DELETION",
     SET_CURRENT_LIST: "SET_CURRENT_LIST",
     SET_ITEM_EDIT_ACTIVE: "SET_ITEM_EDIT_ACTIVE",
-    SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE"
+    SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
+    RELOAD: "RELOAD"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -117,6 +118,20 @@ function GlobalStoreContextProvider(props) {
                     loadModal: true
                 });
             }
+
+            //reload page when listCard is updated
+            case GlobalStoreActionType.RELOAD: {
+                return setStore({
+                    idNamePairs: store.idNamePairs,
+                    currentList: store.currentList,
+                    newListCounter: store.newListCounter,
+                    isListNameEditActive: false,
+                    isItemEditActive: false,
+                    listMarkedForDeletion: null,
+                    loadModal: false
+                });
+            }
+
             // PREPARE TO DELETE A LIST
             case GlobalStoreActionType.UNMARK_LIST_FOR_DELETION: {
                 return setStore({
@@ -243,6 +258,25 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
+    //this function publishes the selected list
+    store.publishList = async function(id){
+        console.log(id);
+        let response = await api.getTop5ListById(id);
+        if (response.data.success) {
+            let list = response.data.top5List;
+            list.published = true;
+            //list.publishDate = new Date();
+            list.publishDate = 2;
+
+            response = await api.updateTop5ListById(list._id, list);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.RELOAD,
+                });
+            }
+        }
+    }
+
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
     store.loadIdNamePairs = async function () {
         const response = await api.getTop5ListPairs();
@@ -281,7 +315,7 @@ function GlobalStoreContextProvider(props) {
     }
     store.hideDeleteListModal = function (){
         storeReducer({
-            type: GlobalStoreActionType.UNMARK_LIST_FOR_DELETION,
+            type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
 
         });
     }
@@ -314,6 +348,7 @@ function GlobalStoreContextProvider(props) {
         let response = await api.getTop5ListById(id);
         if (response.data.success) {
             let top5List = response.data.top5List;
+            if(top5List.published == true) top5List.views = top5List.views + 1
 
             response = await api.updateTop5ListById(top5List._id, top5List);
             if (response.data.success) {
@@ -372,6 +407,47 @@ function GlobalStoreContextProvider(props) {
                 type: GlobalStoreActionType.SET_CURRENT_LIST,
                 payload: store.currentList
             });
+        }
+    }
+
+    store.likeList = async function(id) {
+        let response = await api.getTop5ListById(id);
+        if (response.data.success) {
+            let top5List = response.data.top5List;
+            let email = auth.user.email;
+            if(top5List.likes.includes(email)){
+                top5List.likes.splice(top5List.likes.indexOf(email),1);
+            }else{
+                top5List.dislikes.splice(top5List.dislikes.indexOf(email),1);
+                top5List.likes.push(email);
+            }
+
+            response = await api.updateTop5ListById(top5List._id, top5List);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.RELOAD,
+                });
+            }
+        }
+    }
+
+    store.dislikeList = async function(id) {
+        let response = await api.getTop5ListById(id);
+        if (response.data.success) {
+            let top5List = response.data.top5List;
+            let email = auth.user.email;
+            if(top5List.dislikes.includes(email)){
+                top5List.dislikes.splice(top5List.dislikes.indexOf(email),1);
+            }else{
+                top5List.likes.splice(top5List.likes.indexOf(email),1);
+                top5List.dislikes.push(email);
+            }
+            response = await api.updateTop5ListById(top5List._id, top5List);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.RELOAD,
+                });
+            }
         }
     }
 

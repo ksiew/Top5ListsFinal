@@ -27,9 +27,33 @@ function ListCard(props) {
         }
     }
 
+    function handleToggleList(event, id) {
+        event.stopPropagation();
+        if(store.currentList !== null && store.currentList._id === id){
+            store.closeCurrentList();
+        }else{
+            store.setCurrentList(id);
+        }
+    }
+
+    function handleLike(event, id){
+        event.stopPropagation();
+        store.likeList(id);
+    }
+
+    function handleDislike(event, id){
+        event.stopPropagation();
+        store.dislikeList(id);
+    }
+
     function handleToggleEdit(event) {
         event.stopPropagation();
         toggleEdit();
+    }
+
+    function handlePublish(event, id){
+        event.stopPropagation();
+        store.publishList(id);
     }
 
     function toggleEdit() {
@@ -84,6 +108,28 @@ function ListCard(props) {
                         <DeleteIcon style={{fontSize:'48pt'}} />
                     </IconButton>
                 </Box>
+                <Box sx={{ p: 1 }}>
+                    <IconButton onClick={(event) => {
+                        handlePublish(event, idNamePair._id)
+                    }}>
+                        Publish
+                    </IconButton>
+                </Box>
+                <Box sx={{ p: 1 }}>
+                    <IconButton onClick={(event) => {
+                        handleLike(event, idNamePair._id)
+                    }}>
+                        likes
+                    </IconButton>
+                </Box>
+                <Box sx={{ p: 1 }}>
+                    <IconButton onClick={(event) => {
+                        handleDislike(event, idNamePair._id)
+                    }}>
+                        dislike
+                    </IconButton>
+                </Box>
+
         </ListItem>
 
     if (editActive) {

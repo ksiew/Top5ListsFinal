@@ -17,6 +17,13 @@ function EditToolbar() {
     function saveList(){
         store.updateCurrentList();
     }
+
+    function handleUndo() {
+        store.undo();
+    }
+    function handleRedo() {
+        store.redo();
+    }
     function handleClose() {
         store.closeCurrentList();
     }
