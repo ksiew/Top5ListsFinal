@@ -47,7 +47,6 @@ export default function DeleteModal(props) {
   const handleClose = () => {
     close();
   };
-  console.log(store);
   const handleDelete = () => {
       props.delete();
       handleClose();

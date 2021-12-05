@@ -72,14 +72,11 @@ export default function AppBanner() {
         </Menu>        
 
     let intials = "";
-    let editToolbar = "";
+    let editToolbar = <EditToolbar />;;
     let menu = loggedOutMenu;
     if (auth.loggedIn) {
         intials = auth.user.firstName.charAt(0) + auth.user.lastName.charAt(0);
         menu = loggedInMenu;
-        if (store.currentList) {
-            editToolbar = <EditToolbar />;
-        }
     }
     
     function getAccountMenu(loggedIn) {

@@ -113,7 +113,7 @@ function AuthContextProvider(props) {
                     }
                 })
                 history.push("/");
-                store.loadIdNamePairs();
+                store.loadIdNamePairs("HOME");
             }
         }
         catch(err){
@@ -137,7 +137,7 @@ function AuthContextProvider(props) {
                     }
                 })
                 history.push("/");
-                store.loadIdNamePairs();
+                store.loadIdNamePairs("HOME");
             }
         }
         catch(err){

@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { GlobalStoreContext } from '../store'
+import ScreenType from '../store'
 import ListCard from './ListCard.js'
 import { Fab, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add';
@@ -13,7 +14,7 @@ const HomeScreen = () => {
     const { store } = useContext(GlobalStoreContext);
 
     useEffect(() => {
-        store.loadIdNamePairs();
+        store.loadIdNamePairs("HOME");
     }, []);
 
     function handleCreateNewList() {

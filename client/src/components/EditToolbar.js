@@ -4,6 +4,7 @@ import Button from '@mui/material/Button';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import CloseIcon from '@mui/icons-material/HighlightOff';
+import ScreenType from '../store'
 
 /*
     This toolbar is a functional React component that
@@ -16,6 +17,14 @@ function EditToolbar() {
 
     function saveList(){
         store.updateCurrentList();
+    }
+
+    function handleHome(){
+        store.loadIdNamePairs("HOME");
+    }
+
+    function handleAll(){
+        store.loadIdNamePairs("ALL");
     }
 
     function handleUndo() {
@@ -33,6 +42,18 @@ function EditToolbar() {
     }  
     return (
         <div id="edit-toolbar">
+            <Button 
+                id='undo-button'
+                onClick={handleHome}
+                variant="contained">
+                    home
+            </Button>
+            <Button 
+                id='undo-button'
+                onClick={handleAll}
+                variant="contained">
+                    All
+            </Button>
             <Button 
                 disabled={editStatus ? true : store.canUndo() ? false : true}
                 id='undo-button'

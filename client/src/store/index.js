@@ -77,7 +77,7 @@ function GlobalStoreContextProvider(props) {
                     isItemEditActive: false,
                     listMarkedForDeletion: null,
                     loadModal: false,
-                    screen: ScreenType.HOME,
+                    screen: store.screen
                 });
             }
 
@@ -105,33 +105,34 @@ function GlobalStoreContextProvider(props) {
                     isItemEditActive: false,
                     listMarkedForDeletion: null,
                     loadModal: false,
-                    screen: ScreenType.HOME
+                    screen: store.screen
                 })
             }
             // GET ALL THE LISTS SO WE CAN PRESENT THEM
             case GlobalStoreActionType.LOAD_ID_NAME_PAIRS: {
                 return setStore({
-                    idNamePairs: payload,
+                    idNamePairs: payload.idNamePairs,
                     currentList: null,
                     newListCounter: store.newListCounter,
                     isListNameEditActive: false,
                     isItemEditActive: false,
                     listMarkedForDeletion: null,
                     loadModal: false,
-                    screen: store.screen
+                    screen: payload.screen
                 });
             }
 
             case GlobalStoreActionType.CHANGE_SCREEN: {
+                let test = payload;
                 return setStore({
-                    idNamePairs: store.idNamePairs,
+                    idNamePairs: payload.idNamePairs,
                     currentList: null,
                     newListCounter: store.newListCounter,
                     isListNameEditActive: false,
                     isItemEditActive: false,
                     listMarkedForDeletion: null,
                     loadModal: false,
-                    screen: payload
+                    screen: payload.screen
                 });
             }
             // PREPARE TO DELETE A LIST
@@ -144,7 +145,7 @@ function GlobalStoreContextProvider(props) {
                     isItemEditActive: false,
                     listMarkedForDeletion: payload,
                     loadModal: true,
-                    screen: ScreenType.HOME
+                    screen: store.screen
                 });
             }
 
@@ -198,7 +199,7 @@ function GlobalStoreContextProvider(props) {
                     isItemEditActive: true,
                     listMarkedForDeletion: null,
                     loadModal: false,
-                    screen: ScreenType.HOME
+                    screen: store.screen
                 });
             }
             // START EDITING A LIST NAME
@@ -211,7 +212,7 @@ function GlobalStoreContextProvider(props) {
                     isItemEditActive: false,
                     listMarkedForDeletion: null,
                     loadModal: false,
-                    screen: ScreenType.HOME
+                    screen: store.screen
                 });
             }
             default:
@@ -296,7 +297,6 @@ function GlobalStoreContextProvider(props) {
 
     //this function publishes the selected list
     store.publishList = async function(id){
-        console.log(id);
         let response = await api.getTop5ListById(id);
         if (response.data.success) {
             let list = response.data.top5List;
@@ -314,21 +314,41 @@ function GlobalStoreContextProvider(props) {
     }
 
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
-    store.loadIdNamePairs = async function () {
+    store.loadIdNamePairs = async function (screen) {
         const response = await api.getTop5ListPairs();
 
         if (response.data.success) {
             let fuck = await api.getAllTop5Lists();
             let fuck2 = [];
+
+            //sets fuck 2 to an array with list id a skey with the list itself as the valuie
             fuck.data.data.forEach(list => fuck2[list._id] = list);
-            let pairsArray = response.data.idNamePairs.filter(pair => fuck2[pair._id].ownerEmail == auth.user.email);
-            storeReducer({
-                type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
-                payload: pairsArray
-            });
-        }
-        else {
-            console.log("API FAILED TO GET THE LIST PAIRS");
+            if(screen == ScreenType.HOME){
+                let pairsArray = response.data.idNamePairs.filter(pair => fuck2[pair._id].ownerEmail == auth.user.email);
+                storeReducer({
+                    type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
+                    payload: {
+                        screen: ScreenType.HOME,
+                        idNamePairs: pairsArray
+                    }
+                });
+            }
+            console.log(fuck2);
+            let pairs = response.data.idNamePairs.filter(pair => fuck2[pair._id].published == true);
+
+            if(screen == ScreenType.ALL){
+                storeReducer({
+                    type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
+                    payload: {
+                        screen: ScreenType.ALL,
+                        idNamePairs: pairs
+                    }
+                });
+            }
+            if(screen == ScreenType.COMMUNITY){
+
+            }
+
         }
     }
 
@@ -350,16 +370,6 @@ function GlobalStoreContextProvider(props) {
 
     }
 
-    store.changeScreen = function (screen) {
-        storeReducer({
-            type: GlobalStoreActionType.CHANGE_SCREEN,
-            payload: screen
-
-        });
-
-        store.loadIdNamePairs();
-    }
-
     store.hideDeleteListModal = function (){
         storeReducer({
             type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
@@ -371,7 +381,7 @@ function GlobalStoreContextProvider(props) {
     store.deleteList = async function (listToDelete) {
         let response = await api.deleteTop5ListById(listToDelete._id);
         if (response.data.success) {
-            store.loadIdNamePairs();
+            store.loadIdNamePairs(ScreenType.HOME);
             history.push("/");
         }
     }
