@@ -313,16 +313,41 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
+    //this function adds a comment to a published list
+    store.addComment = async function (id, comment){
+        let response = await api.getTop5ListById(id);
+        if(response.data.success){
+            let list = response.data.top5List;
+            list.comments.push(comment);
+            response = await api.updateTop5ListById(list._id,list);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.RELOAD,
+                });
+            }
+        }
+    }
+
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
     store.loadIdNamePairs = async function (screen) {
-        const response = await api.getTop5ListPairs();
+        let response = await api.getTop5ListPairs();
 
         if (response.data.success) {
             let fuck = await api.getAllTop5Lists();
+            if(screen != ScreenType.COMMUNITY){
+                fuck.data.data.forEach(list => (list.ownerEmail == "community") ? store.deleteList(list) : null);
+                fuck = await api.getAllTop5Lists();
+            }
+
+
             let fuck2 = [];
 
             //sets fuck 2 to an array with list id a skey with the list itself as the valuie
             fuck.data.data.forEach(list => fuck2[list._id] = list);
+
+            let pairs = response.data.idNamePairs.filter(pair => fuck2[pair._id].published == true);
+
+
             if(screen == ScreenType.HOME){
                 let pairsArray = response.data.idNamePairs.filter(pair => fuck2[pair._id].ownerEmail == auth.user.email);
                 storeReducer({
@@ -333,8 +358,10 @@ function GlobalStoreContextProvider(props) {
                     }
                 });
             }
-            console.log(fuck2);
-            let pairs = response.data.idNamePairs.filter(pair => fuck2[pair._id].published == true);
+
+            let publishedLists = [];
+            fuck.data.data.forEach(list => (list.published == true) ? publishedLists[list._id] = list : null);
+
 
             if(screen == ScreenType.ALL){
                 storeReducer({
@@ -346,6 +373,82 @@ function GlobalStoreContextProvider(props) {
                 });
             }
             if(screen == ScreenType.COMMUNITY){
+                // a list with all the unique list names as keys and their items as the value
+                let aggregate = [];
+
+                //takes an array of top5lists and a list name to return the top5 voted items
+                async function findTop5(lists, name){
+                    let filteredLists = [];
+                    for(var i in lists){
+                        let list = lists[i];
+                        if(list.name == name) filteredLists.push(list);
+                    }
+                    let top5 = [];
+                    for(var i in filteredLists){
+                        let list = filteredLists[i];
+                        top5[list.items[0]] = top5[list.items[0]] ? top5[list.items[0]] + 5 : 5;
+                        top5[list.items[1]] = top5[list.items[1]] ? top5[list.items[1]] + 4 : 4;
+                        top5[list.items[2]] = top5[list.items[2]] ? top5[list.items[2]] + 3 : 3;
+                        top5[list.items[3]] = top5[list.items[3]] ? top5[list.items[3]] + 2 : 2;
+                        top5[list.items[4]] = top5[list.items[4]] ? top5[list.items[4]] + 1 : 1;
+                    }
+                    let top5Lists = [];
+                    for(var i = 0; i < 5; i ++){
+                        let max = 0;
+                        let maxName ="";
+                        for(var listName in top5){
+                            if(!top5Lists.includes(listName) && top5[listName] > max){
+                                maxName = listName;
+                            }
+                        }
+                        top5Lists[i] = maxName;
+                        top5.splice(maxName, 1);
+                    }
+
+                    let payload = {
+                        name: "Community " + name,
+                        items: top5Lists,
+                        ownerEmail: "community",
+                        published: true,
+                        publishDate: 2
+
+                    };
+
+                    const response2 = await api.createTop5List(payload);
+                    if(response2.data.success){
+                        return response2.data.top5List;
+                    }else{
+                        return "error"
+                    }
+                }
+
+                let temp = [];
+                for(let i = 0; i < pairs.length; i ++){
+                    temp.push(pairs[i].name);
+                }
+
+                let uniqueNames = new Set(temp);
+                let communityLists = [];
+                uniqueNames.forEach(name => communityLists.push(findTop5(publishedLists, name)));
+                fuck = await api.getAllTop5Lists();
+                response = await api.getTop5ListPairs();
+
+                
+                fuck.data.data.forEach(list => fuck2[list._id] = list);
+                fuck.data.data.forEach(list => communityLists[list._id] = list);
+
+
+                communityLists =  response.data.idNamePairs.filter(pair => pair.name.substring(0,9) == "Community");
+
+
+
+                storeReducer({
+                    type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
+                    payload: {
+                        screen: ScreenType.COMMUNITY,
+                        idNamePairs: communityLists
+                    }
+                });
 
             }
 

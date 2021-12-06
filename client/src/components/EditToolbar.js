@@ -27,6 +27,10 @@ function EditToolbar() {
         store.loadIdNamePairs("ALL");
     }
 
+    function handleCommunity(){
+        store.loadIdNamePairs("COMMUNITY");
+    }
+
     function handleUndo() {
         store.undo();
     }
@@ -53,6 +57,12 @@ function EditToolbar() {
                 onClick={handleAll}
                 variant="contained">
                     All
+            </Button>
+            <Button 
+                id='undo-button'
+                onClick={handleCommunity}
+                variant="contained">
+                    Community
             </Button>
             <Button 
                 disabled={editStatus ? true : store.canUndo() ? false : true}
