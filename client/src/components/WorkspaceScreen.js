@@ -37,7 +37,7 @@ function WorkspaceScreen() {
 
     if(store.currentList && store.currentList.published == false){
         buttons =
-        <Box  sx={{ pt: 50, pl: 170 }} >
+        <Box  sx={{ pt: 40, pl: 160 }} >
             <TextField
                 margin="normal"
                 required

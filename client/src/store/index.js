@@ -283,6 +283,7 @@ function GlobalStoreContextProvider(props) {
 
     // THIS FUNCTION CREATES A NEW LIST
     store.createNewList = async function () {
+        if(auth.user.email == "Guest") return null;
         let newListName = "Untitled" + store.newListCounter;
         let payload = {
             name: newListName,
@@ -313,6 +314,9 @@ function GlobalStoreContextProvider(props) {
         let response = await api.getTop5ListById(id);
         if (response.data.success) {
             let list = response.data.top5List;
+            for(var i in store.idNamePairs){
+                if(store.idNamePairs[i].published == true && store.idNamePairs[i].name.toUpperCase() == list.name.toUpperCase()) return null;
+            }
             list.published = true;
             //list.publishDate = new Date();
             list.publishDate = new Date();

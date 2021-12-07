@@ -33,7 +33,10 @@ export default function AppBanner() {
     }
 
     const handleGuest = () => {
-        
+        auth.logInUser({ 
+            userName: "Guest",
+            password: "K!u7Q3vXKg3L36!",
+          }, store);
     }
 
     const menuId = 'primary-search-account-menu';

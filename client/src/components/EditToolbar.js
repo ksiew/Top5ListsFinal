@@ -73,22 +73,27 @@ function EditToolbar() {
         </Menu>        
 
     function handleSortViews(){
+        handleMenuClose();
         store.sortLists("VIEWS");
     }
 
     function handleSortLikes(){
+        handleMenuClose();
         store.sortLists("LIKES");
     }
 
     function handleSortDislikes(){
+        handleMenuClose();
         store.sortLists("DISLIKES");
     }
 
     function handleSortNew(){
+        handleMenuClose();
         store.sortLists("DATE_NEW");
     }
 
     function handleSortOld(){
+        handleMenuClose();
         store.sortLists("DATE_OLD");
     }
 
