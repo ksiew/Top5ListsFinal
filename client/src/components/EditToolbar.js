@@ -106,7 +106,6 @@ function EditToolbar() {
     }
 
     function handleUser(){
-        console.log("user0");
         store.loadIdNamePairs("USER");
     }
 
