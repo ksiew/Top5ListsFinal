@@ -34,9 +34,18 @@ export const GlobalStoreActionType = {
 
 export const ScreenType ={
     HOME : "HOME",
-    USERS: "USERS",
+    USER: "USER",
     COMMUNITY: "COMMUNITY",
     ALL: "ALL"
+}
+
+export const SortType ={
+   VIEWS: "VIEWS",
+   DATE_OLD: "DATE_OLD",
+   DATE_NEW: "DATE_NEW",
+   LIKES: "LIKES",
+   DISLIKES: "DISLIKES",
+
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -56,6 +65,7 @@ function GlobalStoreContextProvider(props) {
         listMarkedForDeletion: null,
         loadModal: false,
         screen: ScreenType.HOME,
+        sort: SortType.DATE_NEW
     });
     const history = useHistory();
 
@@ -71,7 +81,7 @@ function GlobalStoreContextProvider(props) {
             case GlobalStoreActionType.CHANGE_LIST_NAME: {
                 return setStore({
                     idNamePairs: payload.idNamePairs,
-                    currentList: null,
+                    currentList: store.currentList,
                     newListCounter: store.newListCounter,
                     isListNameEditActive: false,
                     isItemEditActive: false,
@@ -226,6 +236,7 @@ function GlobalStoreContextProvider(props) {
 
     // THIS FUNCTION PROCESSES CHANGING A LIST NAME
     store.changeListName = async function (id, newName) {
+        console.log("changing list naem");
         let response = await api.getTop5ListById(id);
         if (response.data.success) {
             let top5List = response.data.top5List;
@@ -241,6 +252,7 @@ function GlobalStoreContextProvider(props) {
                                 let fuck2 = [];
                                 fuck.data.data.forEach(list => fuck2[list._id] = list);
                                 let pairsArray = response.data.idNamePairs.filter(pair => fuck2[pair._id].ownerEmail == auth.user.email);
+
                                 storeReducer({
                                     type: GlobalStoreActionType.CHANGE_LIST_NAME,
                                     payload: {
@@ -275,7 +287,8 @@ function GlobalStoreContextProvider(props) {
         let payload = {
             name: newListName,
             items: ["?", "?", "?", "?", "?"],
-            ownerEmail: auth.user.email
+            ownerEmail: auth.user.email,
+            ownerName: auth.user.userName
         };
         const response = await api.createTop5List(payload);
         if (response.data.success) {
@@ -302,13 +315,15 @@ function GlobalStoreContextProvider(props) {
             let list = response.data.top5List;
             list.published = true;
             //list.publishDate = new Date();
-            list.publishDate = 2;
+            list.publishDate = new Date();
 
             response = await api.updateTop5ListById(list._id, list);
             if (response.data.success) {
-                storeReducer({
-                    type: GlobalStoreActionType.RELOAD,
-                });
+                    storeReducer({
+                        type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
+                    });
+                    store.loadIdNamePairs(store.screen);
+                    history.push("/");
             }
         }
     }
@@ -318,18 +333,19 @@ function GlobalStoreContextProvider(props) {
         let response = await api.getTop5ListById(id);
         if(response.data.success){
             let list = response.data.top5List;
-            list.comments.push(comment);
+            list.comments.push(auth.user.userName + ": " + comment);
             response = await api.updateTop5ListById(list._id,list);
             if (response.data.success) {
                 storeReducer({
                     type: GlobalStoreActionType.RELOAD,
                 });
+                store.loadIdNamePairs(store.screen);
             }
         }
     }
 
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
-    store.loadIdNamePairs = async function (screen) {
+    store.loadIdNamePairs = async function (screen, term = "") {
         let response = await api.getTop5ListPairs();
 
         if (response.data.success) {
@@ -339,17 +355,23 @@ function GlobalStoreContextProvider(props) {
                 fuck = await api.getAllTop5Lists();
             }
 
-
             let fuck2 = [];
 
             //sets fuck 2 to an array with list id a skey with the list itself as the valuie
             fuck.data.data.forEach(list => fuck2[list._id] = list);
 
             let pairs = response.data.idNamePairs.filter(pair => fuck2[pair._id].published == true);
-
+            const length = term.length;
+            if(store.screen == ScreenType.USER){
+                console.log(pairs);
+                pairs = pairs.filter(pair => pair.ownerName.substring(0,length).toUpperCase() == term.toUpperCase());
+            }else{
+                pairs = pairs.filter(pair => pair.name.substring(0,length).toUpperCase() == term.toUpperCase());
+            }
 
             if(screen == ScreenType.HOME){
                 let pairsArray = response.data.idNamePairs.filter(pair => fuck2[pair._id].ownerEmail == auth.user.email);
+                pairsArray = pairsArray.filter(pair => pair.name.substring(0,length).toUpperCase() == term.toUpperCase());
                 storeReducer({
                     type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
                     payload: {
@@ -372,9 +394,20 @@ function GlobalStoreContextProvider(props) {
                     }
                 });
             }
+
+            if(screen == ScreenType.USER){
+                console.log("user0");
+                storeReducer({
+                    type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
+                    payload: {
+                        screen: ScreenType.USER,
+                        idNamePairs: pairs
+                    }
+                });
+            }
+
             if(screen == ScreenType.COMMUNITY){
-                // a list with all the unique list names as keys and their items as the value
-                let aggregate = [];
+                
 
                 //takes an array of top5lists and a list name to return the top5 voted items
                 async function findTop5(lists, name){
@@ -382,6 +415,7 @@ function GlobalStoreContextProvider(props) {
                     for(var i in lists){
                         let list = lists[i];
                         if(list.name == name) filteredLists.push(list);
+                        if(list.ownerEmail == "community") return null;
                     }
                     let top5 = [];
                     for(var i in filteredLists){
@@ -409,8 +443,9 @@ function GlobalStoreContextProvider(props) {
                         name: "Community " + name,
                         items: top5Lists,
                         ownerEmail: "community",
+                        ownerName: "Community",
                         published: true,
-                        publishDate: 2
+                        publishDate: new Date()
 
                     };
 
@@ -439,6 +474,7 @@ function GlobalStoreContextProvider(props) {
 
 
                 communityLists =  response.data.idNamePairs.filter(pair => pair.name.substring(0,9) == "Community");
+                communityLists = communityLists.filter(pair => pair.name.substring(0,length).toUpperCase() == term.toUpperCase());
 
 
 
@@ -471,6 +507,43 @@ function GlobalStoreContextProvider(props) {
             });
         }
 
+    }
+
+    store.sortLists = async function(sortType){
+        let pairs = store.idNamePairs;
+        switch (sortType){     
+            case SortType.VIEWS:
+                pairs = pairs.sort((a,b) => b.views - a.views);
+                break;
+
+            case SortType.LIKES:
+                pairs = pairs.sort((a,b) => b.likes.length - a.likes.length);
+                break;
+
+            case SortType.DISLIKES:
+                pairs = pairs.sort((a,b) => b.dislikes.length - a.dislikes.length);
+                break;
+
+            case SortType.DATE_NEW:
+                pairs = pairs.sort((a,b) => (b.publishDate > a.publishDate) ? 1 : -1);
+                break;
+
+            case SortType.DATE_NEW:
+                pairs = pairs.sort((a,b) => (a.publishDate > b.publishDate) ? 1 : -1);
+                break;
+
+        }
+        storeReducer({
+            type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
+            payload: {
+                idNamePairs: pairs,
+                screen: store.screen,
+            }
+        });
+    }
+
+    store.search = async function (term){
+        store.loadIdNamePairs(store.screen, term);
     }
 
     store.hideDeleteListModal = function (){
@@ -516,10 +589,13 @@ function GlobalStoreContextProvider(props) {
                     type: GlobalStoreActionType.SET_CURRENT_LIST,
                     payload: top5List
                 });
-                history.push("/top5list/" + top5List._id);
             }
+            if(top5List.published == false)  history.push("/top5list/" + top5List._id);
+
         }
     }
+
+
 
     store.addMoveItemTransaction = function (start, end) {
         let transaction = new MoveItem_Transaction(store, start, end);
@@ -570,6 +646,11 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
+    store.save = function() {
+        store.updateCurrentList();
+        history.push("/");
+    }
+
     store.likeList = async function(id) {
         let response = await api.getTop5ListById(id);
         if (response.data.success) {
@@ -587,6 +668,7 @@ function GlobalStoreContextProvider(props) {
                 storeReducer({
                     type: GlobalStoreActionType.RELOAD,
                 });
+                store.loadIdNamePairs(store.screen);
             }
         }
     }
@@ -607,7 +689,19 @@ function GlobalStoreContextProvider(props) {
                 storeReducer({
                     type: GlobalStoreActionType.RELOAD,
                 });
+                store.loadIdNamePairs(store.screen);
             }
+        }
+    }
+
+    store.isPublished = async function(id){
+        const response = await api.getTop5ListById(id);
+        if(response.data.success == true){
+            console.log(id);
+            console.log(response.data.top5List.published);
+            return response.data.top5List.published;
+        }else{
+            return response.data.top5List.published;
         }
     }
 

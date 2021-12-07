@@ -39,6 +39,7 @@ const HomeScreen = () => {
         <div id="top5-list-selector">
             <div id="list-selector-heading">
             <Fab 
+                disabled = {store.screen == "HOME" ? false : true}
                 color="primary" 
                 aria-label="add"
                 id="add-list-button"

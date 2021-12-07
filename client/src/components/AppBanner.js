@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import Button from '@mui/material/Button';
 
 export default function AppBanner() {
     const { auth } = useContext(AuthContext);
@@ -31,9 +32,13 @@ export default function AppBanner() {
         auth.logoutUser();
     }
 
+    const handleGuest = () => {
+        
+    }
+
     const menuId = 'primary-search-account-menu';
     const loggedOutMenu = (
-        <Menu
+        <Box
             anchorEl={anchorEl}
             anchorOrigin={{
                 vertical: 'top',
@@ -48,9 +53,8 @@ export default function AppBanner() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleMenuClose}><Link to='/logIn/'>Log In</Link></MenuItem>
-            <MenuItem onClick={handleMenuClose}><Link to='/register/'>Create New Account</Link></MenuItem>
-        </Menu>
+        
+        </Box>
     );
     const loggedInMenu = 
         <Menu
@@ -71,10 +75,18 @@ export default function AppBanner() {
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>        
 
+    let buttons = 
+    (<Box>
+            <Button onClick={handleMenuClose}><Link to='/logIn/'>Log In</Link></Button>
+            <Button onClick={handleMenuClose}><Link to='/register/'>Create New Account</Link></Button>
+            <Button onClick={handleGuest}><Link to='/register/'>Guest Log In</Link></Button>
+    </Box>);
+
     let intials = "";
-    let editToolbar = <EditToolbar />;;
+    let editToolbar = <EditToolbar />;
     let menu = loggedOutMenu;
     if (auth.loggedIn) {
+        buttons = "";
         intials = auth.user.firstName.charAt(0) + auth.user.lastName.charAt(0);
         menu = loggedInMenu;
     }
@@ -95,14 +107,14 @@ export default function AppBanner() {
                     >
                         <Link style={{ textDecoration: 'none', color: 'white' }} to='/'>T<sup>5</sup>L</Link>
                     </Typography>
-                    <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
                     <Box sx={{ display: { xs: 'none', md: 'flex' } }}> 
                     <Box 
-                    sx={{ flexGrow: 1 }}
+                    sx={{ flexGrow: 1, px: 70}}
                     style={{
                         fontSize: '24pt',
                         width: '80%'
                     }}>{intials}</Box>
+                        {buttons};
                         <IconButton
                             size="large"
                             edge="end"
@@ -116,10 +128,10 @@ export default function AppBanner() {
                         </IconButton>
                     </Box>
                 </Toolbar>
-            </AppBar>
-            {
+                {
                 menu
             }
+            </AppBar>
         </Box>
     );
 }

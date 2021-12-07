@@ -1,10 +1,10 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
+import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
 import { GlobalStoreContext } from '../store'
 import Button from '@mui/material/Button';
-import UndoIcon from '@mui/icons-material/Undo';
-import RedoIcon from '@mui/icons-material/Redo';
 import CloseIcon from '@mui/icons-material/HighlightOff';
-import ScreenType from '../store'
+import TextField from '@mui/material/TextField';
 
 /*
     This toolbar is a functional React component that
@@ -14,10 +14,84 @@ import ScreenType from '../store'
 */
 function EditToolbar() {
     const { store } = useContext(GlobalStoreContext);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [editActive, setEditActive] = useState(false);
+    const isMenuOpen = Boolean(anchorEl);
 
-    function saveList(){
-        store.updateCurrentList();
+    function handleKeyPress(event) {
+        if (event.code === "Enter") {
+            store.search(event.target.value);
+        }
     }
+
+    const searchBar = 
+        <TextField
+        margin="normal"
+        required
+        id={"searchBar"}
+        label="enter search term"
+        name="name"
+        autoComplete="Top 5 Item Name"
+        className='search'
+        onKeyPress={handleKeyPress}
+        defaultValue=""
+        inputProps={{style: {fontSize: 48}}}
+        InputLabelProps={{style: {fontSize: 24}}}
+        autoFocus
+    />
+
+    const handleProfileMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const menuId = "sort-menu"
+    const sortMenu = 
+        <Menu
+            anchorEl={anchorEl}
+            anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+            id={menuId}
+            keepMounted
+            transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+            open={isMenuOpen}
+            onClose={handleMenuClose}
+        >
+            <MenuItem onClick={handleSortViews}>Views</MenuItem>
+            <MenuItem onClick={handleSortLikes}>Likes</MenuItem>
+            <MenuItem onClick={handleSortDislikes}>Dislikes</MenuItem>
+            <MenuItem onClick={handleSortNew}>Date (New)</MenuItem>
+            <MenuItem onClick={handleSortOld}>Date (Old)</MenuItem>
+        </Menu>        
+
+    function handleSortViews(){
+        store.sortLists("VIEWS");
+    }
+
+    function handleSortLikes(){
+        store.sortLists("LIKES");
+    }
+
+    function handleSortDislikes(){
+        store.sortLists("DISLIKES");
+    }
+
+    function handleSortNew(){
+        store.sortLists("DATE_NEW");
+    }
+
+    function handleSortOld(){
+        store.sortLists("DATE_OLD");
+    }
+
 
     function handleHome(){
         store.loadIdNamePairs("HOME");
@@ -31,12 +105,11 @@ function EditToolbar() {
         store.loadIdNamePairs("COMMUNITY");
     }
 
-    function handleUndo() {
-        store.undo();
+    function handleUser(){
+        console.log("user0");
+        store.loadIdNamePairs("USER");
     }
-    function handleRedo() {
-        store.redo();
-    }
+
     function handleClose() {
         store.closeCurrentList();
     }
@@ -48,43 +121,41 @@ function EditToolbar() {
         <div id="edit-toolbar">
             <Button 
                 id='undo-button'
+                disabled = {store.screen == "HOME" ? true : false}
                 onClick={handleHome}
                 variant="contained">
                     home
             </Button>
             <Button 
                 id='undo-button'
+                disabled = {store.screen == "ALL" ? true : false}
                 onClick={handleAll}
                 variant="contained">
                     All
             </Button>
             <Button 
                 id='undo-button'
+                disabled = {store.screen == "COMMUNITY" ? true : false}
                 onClick={handleCommunity}
                 variant="contained">
                     Community
             </Button>
             <Button 
-                disabled={editStatus ? true : store.canUndo() ? false : true}
                 id='undo-button'
-                onClick={handleUndo}
+                disabled = {store.screen == "USER" ? true : false}
+                onClick={handleUser}
                 variant="contained">
-                    <UndoIcon />
+                    User
             </Button>
+
+            {searchBar}
             <Button 
-                disabled={editStatus ? true : store.canRedo() ? false : true}
-                id='redo-button'
-                onClick={handleRedo}
+                id='sort-menu'
+                onClick={handleProfileMenuOpen}
                 variant="contained">
-                    <RedoIcon />
+                    sort
             </Button>
-            <Button 
-                disabled={editStatus}
-                id='close-button'
-                onClick={handleClose}
-                variant="contained">
-                    <CloseIcon />
-            </Button>
+            {sortMenu}
         </div>
     )
 }

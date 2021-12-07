@@ -32,8 +32,8 @@ getLoggedOut = async (req, res) => {
 
 logIn = async (req, res) => {
     try {
-        const {  email, password } = req.body;
-        if (!email || !password ) {
+        const {  userName, password } = req.body;
+        if (!userName || !password ) {
             return res
                 .status(400)
                 .json({ errorMessage: "Please enter all required fields." });
@@ -46,7 +46,7 @@ logIn = async (req, res) => {
                 });
         }
 
-        const user = await User.findOne({email: email});
+        const user = await User.findOne({userName: userName});
 
         if(user === null){
             return res
@@ -65,6 +65,8 @@ logIn = async (req, res) => {
                 errorMessage: "Wrong password"
             });
         }
+
+
 
         // LOGIN THE USER
         const token = auth.signToken(user);
@@ -113,12 +115,22 @@ registerUser = async (req, res) => {
                 })
         }
         const existingUser = await User.findOne({ email: email });
-        if (existingUser) {
+        if (existingUser || email == "community" || email == "guest") {
             return res
                 .status(400)
                 .json({
                     success: false,
                     errorMessage: "An account with this email address already exists."
+                })
+        }
+
+        const existingUser2 = await User.findOne({ userName: userName });
+        if (existingUser2 || userName == "community" || userName == "guest") {
+            return res
+                .status(400)
+                .json({
+                    success: false,
+                    errorMessage: "An account with this user name already exists."
                 })
         }
 

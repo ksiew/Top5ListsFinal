@@ -77,6 +77,16 @@ function Top5Item(props) {
 
     let { index } = props;
 
+    let edit = "";
+    if(store.currentList.published == false) {
+        edit =            <Box sx={{ p: 1 }}>
+        <IconButton aria-label='edit'
+        onClick={handleToggleEdit}>
+            <EditIcon style={{fontSize:'48pt'}}  />
+        </IconButton>
+    </Box>;
+    }
+
     let itemClass = "top5-item";
     if (draggedTo) {
         itemClass = "top5-item-dragged-to";
@@ -108,22 +118,16 @@ function Top5Item(props) {
                     sx={{ display: 'flex', p: 1 }}
                     style={{
                         fontSize: '48pt',
-                        width: '100%'
+                        width: '80%',
                     }}
                 >
-                <Box sx={{ p: 1 }}>
-                    <IconButton aria-label='edit'
-                    onClick={handleToggleEdit}>
-                        <EditIcon style={{fontSize:'48pt'}}  />
-                    </IconButton>
-                </Box>
                     <Box sx={{ p: 1, flexGrow: 1 }}>{props.text}</Box>
+                    {edit}
                 </ListItem>
         )
     }else{
         return(
             <TextField
-                margin="normal"
                 required
                 fullWidth
                 id={"item-" + (index)}
@@ -135,7 +139,7 @@ function Top5Item(props) {
                 onChange={handleUpdateText}
                 defaultValue={props.text}
                 inputProps={{style: {fontSize: 48}}}
-                InputLabelProps={{style: {fontSize: 24}}}
+                InputLabelProps={{style: {fontSize: 48}}}
                 autoFocus
             />
         )
